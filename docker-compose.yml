@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    container_name: bookinghub_db
+    environment:
+      POSTGRES_DB: bookinghub
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: secret
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./wal_archive:/wal_archive
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./backup:/backup
+    ports:
+      - "5433:5432"
+
+  api:
+    build: ./api
+    container_name: bookinghub_api
+    environment:
+      DATABASE_URL: postgresql://booking:secret@db:5432/bookinghub
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
